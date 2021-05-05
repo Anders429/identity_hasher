@@ -78,8 +78,8 @@ impl Hasher for IdentityHasher {
 
 #[cfg(test)]
 mod tests {
-    use IdentityHasher;
     use std::hash::Hasher;
+    use IdentityHasher;
 
     #[test]
     fn write() {
@@ -132,7 +132,7 @@ mod tests {
 
                 assert_eq!(hasher.finish(), 42);
             }
-        }
+        };
     }
 
     macro_rules! test_write_integer_twice {
@@ -148,7 +148,7 @@ mod tests {
                 hasher.$method(42);
                 hasher.$method(42);
             }
-        }
+        };
     }
 
     test_write_integer!(write_u8);

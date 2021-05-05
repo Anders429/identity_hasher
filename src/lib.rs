@@ -48,7 +48,11 @@ impl Hasher for IdentityHasher {
             .iter_mut()
             .zip(bytes.iter())
             .for_each(|(u64_byte, byte)| *u64_byte = *byte);
-        self.hash = u64::from_ne_bytes(u64_bytes);
+        self.hash = unsafe {
+            // SAFETY: [u8; 8] and u64 are the same size, and any representation of 8 bytes will
+            // correspond to a valid u64 value.
+            std::mem::transmute::<[u8; 8], u64>(u64_bytes)
+        };
     }
 
     write_integer!(write_u8, u8);

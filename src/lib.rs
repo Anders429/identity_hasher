@@ -8,18 +8,18 @@ pub struct IdentityHasher {
 }
 
 macro_rules! debug_assert_unused {
-    ($self:ident) => {
+    ($_self:ident) => {
         #[cfg(debug_assertions)]
         {
-            assert!(!$self.used, "IdentityHasher can only write a single time.");
-            $self.used = true;
+            assert!(!$_self.used, "IdentityHasher can only write a single time.");
+            $_self.used = true;
         }
     };
 }
 
 macro_rules! write_integer {
-    ($fn:ident, $int_type:ty) => {
-        fn $fn(&mut self, i: $int_type) {
+    ($_fn:ident, $int_type:ty) => {
+        fn $_fn(&mut self, i: $int_type) {
             debug_assert_unused!(self);
             self.hash = i as u64;
         }
@@ -27,8 +27,8 @@ macro_rules! write_integer {
 }
 
 macro_rules! write_integer_unavailable {
-    ($fn:ident, $int_type:ty) => {
-        fn $fn(&mut self, _i: $int_type) {
+    ($_fn:ident, $int_type:ty) => {
+        fn $_fn(&mut self, _i: $int_type) {
             panic!("IdentityHasher cannot hash an {}.", stringify!($int_type));
         }
     };
@@ -47,7 +47,7 @@ impl Hasher for IdentityHasher {
         u64_bytes
             .iter_mut()
             .zip(bytes.iter())
-            .for_each(|(u64_byte, byte)| *u64_byte = *byte);
+            .fold((), |_, (u64_byte, byte)| *u64_byte = *byte);
         self.hash = unsafe {
             // SAFETY: [u8; 8] and u64 are the same size, and any representation of 8 bytes will
             // correspond to a valid u64 value.
@@ -66,7 +66,9 @@ impl Hasher for IdentityHasher {
     write_integer!(write_i64, i64);
     write_integer!(write_isize, isize);
 
+    #[cfg(has_u128)]
     write_integer_unavailable!(write_u128, u128);
+    #[cfg(has_i128)]
     write_integer_unavailable!(write_i128, i128);
 
     fn finish(&self) -> u64 {
@@ -76,7 +78,7 @@ impl Hasher for IdentityHasher {
 
 #[cfg(test)]
 mod tests {
-    use crate::IdentityHasher;
+    use IdentityHasher;
     use std::hash::Hasher;
 
     #[test]
@@ -105,7 +107,7 @@ mod tests {
     fn write_more_than_8_bytes() {
         let mut hasher = IdentityHasher::default();
 
-        hasher.write(&42u128.to_ne_bytes());
+        hasher.write(&[0; 16]);
     }
 
     #[test]
@@ -120,216 +122,58 @@ mod tests {
         hasher.write(&42u64.to_ne_bytes());
     }
 
-    #[test]
-    fn write_u8() {
-        let mut hasher = IdentityHasher::default();
+    macro_rules! test_write_integer {
+        ($_fn:ident) => {
+            #[test]
+            fn $_fn() {
+                let mut hasher = IdentityHasher::default();
 
-        hasher.write_u8(42);
+                hasher.$_fn(42);
 
-        assert_eq!(hasher.finish(), 42);
+                assert_eq!(hasher.finish(), 42);
+            }
+        }
     }
 
-    #[test]
-    #[cfg_attr(
-        debug_assertions,
-        should_panic(expected = "IdentityHasher can only write a single time.")
-    )]
-    fn write_u8_twice() {
-        let mut hasher = IdentityHasher::default();
+    macro_rules! test_write_integer_twice {
+        ($_fn:ident, $method:ident) => {
+            #[test]
+            #[cfg_attr(
+                debug_assertions,
+                should_panic(expected = "IdentityHasher can only write a single time.")
+            )]
+            fn $_fn() {
+                let mut hasher = IdentityHasher::default();
 
-        hasher.write_u8(42);
-        hasher.write_u8(42);
+                hasher.$method(42);
+                hasher.$method(42);
+            }
+        }
     }
 
-    #[test]
-    fn write_u16() {
-        let mut hasher = IdentityHasher::default();
+    test_write_integer!(write_u8);
+    test_write_integer!(write_u16);
+    test_write_integer!(write_u32);
+    test_write_integer!(write_u64);
+    test_write_integer!(write_usize);
+    test_write_integer!(write_i8);
+    test_write_integer!(write_i16);
+    test_write_integer!(write_i32);
+    test_write_integer!(write_i64);
+    test_write_integer!(write_isize);
 
-        hasher.write_u16(42);
+    test_write_integer_twice!(write_u8_twice, write_u8);
+    test_write_integer_twice!(write_u16_twice, write_u16);
+    test_write_integer_twice!(write_u32_twice, write_u32);
+    test_write_integer_twice!(write_u64_twice, write_u64);
+    test_write_integer_twice!(write_usize_twice, write_usize);
+    test_write_integer_twice!(write_i8_twice, write_i8);
+    test_write_integer_twice!(write_i16_twice, write_i16);
+    test_write_integer_twice!(write_i32_twice, write_i32);
+    test_write_integer_twice!(write_i64_twice, write_i64);
+    test_write_integer_twice!(write_isize_twice, write_isize);
 
-        assert_eq!(hasher.finish(), 42);
-    }
-
-    #[test]
-    #[cfg_attr(
-        debug_assertions,
-        should_panic(expected = "IdentityHasher can only write a single time.")
-    )]
-    fn write_u16_twice() {
-        let mut hasher = IdentityHasher::default();
-
-        hasher.write_u16(42);
-        hasher.write_u16(42);
-    }
-
-    #[test]
-    fn write_u32() {
-        let mut hasher = IdentityHasher::default();
-
-        hasher.write_u32(42);
-
-        assert_eq!(hasher.finish(), 42);
-    }
-
-    #[test]
-    #[cfg_attr(
-        debug_assertions,
-        should_panic(expected = "IdentityHasher can only write a single time.")
-    )]
-    fn write_u32_twice() {
-        let mut hasher = IdentityHasher::default();
-
-        hasher.write_u32(42);
-        hasher.write_u32(42);
-    }
-
-    #[test]
-    fn write_u64() {
-        let mut hasher = IdentityHasher::default();
-
-        hasher.write_u64(42);
-
-        assert_eq!(hasher.finish(), 42);
-    }
-
-    #[test]
-    #[cfg_attr(
-        debug_assertions,
-        should_panic(expected = "IdentityHasher can only write a single time.")
-    )]
-    fn write_u64_twice() {
-        let mut hasher = IdentityHasher::default();
-
-        hasher.write_u64(42);
-        hasher.write_u64(42);
-    }
-
-    #[test]
-    fn write_usize() {
-        let mut hasher = IdentityHasher::default();
-
-        hasher.write_usize(42);
-
-        assert_eq!(hasher.finish(), 42);
-    }
-
-    #[test]
-    #[cfg_attr(
-        debug_assertions,
-        should_panic(expected = "IdentityHasher can only write a single time.")
-    )]
-    fn write_usize_twice() {
-        let mut hasher = IdentityHasher::default();
-
-        hasher.write_usize(42);
-        hasher.write_usize(42);
-    }
-
-    #[test]
-    fn write_i8() {
-        let mut hasher = IdentityHasher::default();
-
-        hasher.write_i8(42);
-
-        assert_eq!(hasher.finish(), 42);
-    }
-
-    #[test]
-    #[cfg_attr(
-        debug_assertions,
-        should_panic(expected = "IdentityHasher can only write a single time.")
-    )]
-    fn write_i8_twice() {
-        let mut hasher = IdentityHasher::default();
-
-        hasher.write_i8(42);
-        hasher.write_i8(42);
-    }
-
-    #[test]
-    fn write_i16() {
-        let mut hasher = IdentityHasher::default();
-
-        hasher.write_i16(42);
-
-        assert_eq!(hasher.finish(), 42);
-    }
-
-    #[test]
-    #[cfg_attr(
-        debug_assertions,
-        should_panic(expected = "IdentityHasher can only write a single time.")
-    )]
-    fn write_i16_twice() {
-        let mut hasher = IdentityHasher::default();
-
-        hasher.write_i16(42);
-        hasher.write_i16(42);
-    }
-
-    #[test]
-    fn write_i32() {
-        let mut hasher = IdentityHasher::default();
-
-        hasher.write_i32(42);
-
-        assert_eq!(hasher.finish(), 42);
-    }
-
-    #[test]
-    #[cfg_attr(
-        debug_assertions,
-        should_panic(expected = "IdentityHasher can only write a single time.")
-    )]
-    fn write_i32_twice() {
-        let mut hasher = IdentityHasher::default();
-
-        hasher.write_i32(42);
-        hasher.write_i32(42);
-    }
-
-    #[test]
-    fn write_i64() {
-        let mut hasher = IdentityHasher::default();
-
-        hasher.write_i64(42);
-
-        assert_eq!(hasher.finish(), 42);
-    }
-
-    #[test]
-    #[cfg_attr(
-        debug_assertions,
-        should_panic(expected = "IdentityHasher can only write a single time.")
-    )]
-    fn write_i64_twice() {
-        let mut hasher = IdentityHasher::default();
-
-        hasher.write_i64(42);
-        hasher.write_i64(42);
-    }
-
-    #[test]
-    fn write_isize() {
-        let mut hasher = IdentityHasher::default();
-
-        hasher.write_isize(42);
-
-        assert_eq!(hasher.finish(), 42);
-    }
-
-    #[test]
-    #[cfg_attr(
-        debug_assertions,
-        should_panic(expected = "IdentityHasher can only write a single time.")
-    )]
-    fn write_isize_twice() {
-        let mut hasher = IdentityHasher::default();
-
-        hasher.write_isize(42);
-        hasher.write_isize(42);
-    }
-
+    #[cfg(has_u128)]
     #[test]
     #[should_panic(expected = "IdentityHasher cannot hash an u128.")]
     fn write_u128() {
@@ -338,6 +182,7 @@ mod tests {
         hasher.write_u128(42);
     }
 
+    #[cfg(has_i128)]
     #[test]
     #[should_panic(expected = "IdentityHasher cannot hash an i128.")]
     fn write_i128() {

@@ -37,16 +37,17 @@ macro_rules! write_integer_unavailable {
 impl Hasher for IdentityHasher {
     fn write(&mut self, bytes: &[u8]) {
         debug_assert_unused!(self);
-
-        assert!(
+        debug_assert!(
             bytes.len() <= 8,
             "IdentityHasher cannot write {} bytes. Maximum is 8.",
             bytes.len()
         );
 
         let mut u64_bytes = [0; 8];
-        // SAFETY: Asserted above that `bytes.len()` was not more than 8.
-        unsafe { u64_bytes.get_unchecked_mut(..bytes.len()) }.copy_from_slice(bytes);
+        u64_bytes
+            .iter_mut()
+            .zip(bytes.iter())
+            .for_each(|(u64_byte, byte)| *u64_byte = *byte);
         self.hash = u64::from_ne_bytes(u64_bytes);
     }
 
@@ -93,7 +94,10 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "IdentityHasher cannot write 16 bytes. Maximum is 8.")]
+    #[cfg_attr(
+        debug_assertions,
+        should_panic(expected = "IdentityHasher cannot write 16 bytes. Maximum is 8.")
+    )]
     fn write_more_than_8_bytes() {
         let mut hasher = IdentityHasher::default();
 

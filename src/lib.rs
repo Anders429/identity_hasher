@@ -28,6 +28,7 @@ macro_rules! debug_assert_unused {
 
 macro_rules! write_integer {
     ($_fn:ident, $int_type:ty) => {
+        #[cfg(rustc_1_3)]
         fn $_fn(&mut self, i: $int_type) {
             debug_assert_unused!(self);
             self.hash = i as u64;
@@ -64,25 +65,15 @@ impl Hasher for IdentityHasher {
         };
     }
 
-    #[cfg(rustc_1_3)]
     write_integer!(write_u8, u8);
-    #[cfg(rustc_1_3)]
     write_integer!(write_u16, u16);
-    #[cfg(rustc_1_3)]
     write_integer!(write_u32, u32);
-    #[cfg(rustc_1_3)]
     write_integer!(write_u64, u64);
-    #[cfg(rustc_1_3)]
     write_integer!(write_usize, usize);
-    #[cfg(rustc_1_3)]
     write_integer!(write_i8, i8);
-    #[cfg(rustc_1_3)]
     write_integer!(write_i16, i16);
-    #[cfg(rustc_1_3)]
     write_integer!(write_i32, i32);
-    #[cfg(rustc_1_3)]
     write_integer!(write_i64, i64);
-    #[cfg(rustc_1_3)]
     write_integer!(write_isize, isize);
 
     #[cfg(has_u128)]

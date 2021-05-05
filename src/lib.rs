@@ -1,6 +1,7 @@
 #![no_std]
 
-use core::{hash::Hasher, mem::transmute};
+use core::hash::Hasher;
+use core::mem::transmute;
 
 #[derive(Clone, Debug, Default)]
 pub struct IdentityHasher {

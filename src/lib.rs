@@ -1,4 +1,7 @@
-#![no_std]
+#![cfg_attr(rustc_1_6, no_std)]
+
+#[cfg(not(rustc_1_6))]
+extern crate std as core;
 
 use core::hash::Hasher;
 use core::mem::transmute;
@@ -10,14 +13,17 @@ pub struct IdentityHasher {
     used: bool,
 }
 
+#[cfg(debug_assertions)]
 macro_rules! debug_assert_unused {
     ($_self:ident) => {
-        #[cfg(debug_assertions)]
-        {
-            assert!(!$_self.used, "IdentityHasher can only write a single time.");
-            $_self.used = true;
-        }
+        assert!(!$_self.used, "IdentityHasher can only write a single time.");
+        $_self.used = true;
     };
+}
+
+#[cfg(not(debug_assertions))]
+macro_rules! debug_assert_unused {
+    ($_self:ident) => {}
 }
 
 macro_rules! write_integer {
@@ -58,15 +64,25 @@ impl Hasher for IdentityHasher {
         };
     }
 
+    #[cfg(rustc_1_3)]
     write_integer!(write_u8, u8);
+    #[cfg(rustc_1_3)]
     write_integer!(write_u16, u16);
+    #[cfg(rustc_1_3)]
     write_integer!(write_u32, u32);
+    #[cfg(rustc_1_3)]
     write_integer!(write_u64, u64);
+    #[cfg(rustc_1_3)]
     write_integer!(write_usize, usize);
+    #[cfg(rustc_1_3)]
     write_integer!(write_i8, i8);
+    #[cfg(rustc_1_3)]
     write_integer!(write_i16, i16);
+    #[cfg(rustc_1_3)]
     write_integer!(write_i32, i32);
+    #[cfg(rustc_1_3)]
     write_integer!(write_i64, i64);
+    #[cfg(rustc_1_3)]
     write_integer!(write_isize, isize);
 
     #[cfg(has_u128)]

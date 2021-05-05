@@ -1,4 +1,6 @@
-use std::hash::Hasher;
+#![no_std]
+
+use core::{hash::Hasher, mem::transmute};
 
 #[derive(Clone, Debug, Default)]
 pub struct IdentityHasher {
@@ -51,7 +53,7 @@ impl Hasher for IdentityHasher {
         self.hash = unsafe {
             // SAFETY: [u8; 8] and u64 are the same size, and any representation of 8 bytes will
             // correspond to a valid u64 value.
-            std::mem::transmute::<[u8; 8], u64>(u64_bytes)
+            transmute::<[u8; 8], u64>(u64_bytes)
         };
     }
 
@@ -78,7 +80,7 @@ impl Hasher for IdentityHasher {
 
 #[cfg(test)]
 mod tests {
-    use std::hash::Hasher;
+    use core::hash::Hasher;
     use IdentityHasher;
 
     #[test]

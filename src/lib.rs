@@ -231,7 +231,10 @@ impl<'de> Deserialize<'de> for IdentityHasher {
                     Some(value) => value,
                     None => return Err(de::Error::invalid_length(1, &self)),
                 };
-                Ok(IdentityHasher { hash: hash, used: used })
+                Ok(IdentityHasher {
+                    hash: hash,
+                    used: used,
+                })
             }
 
             #[cfg(not(debug_assertions))]
@@ -277,7 +280,10 @@ impl<'de> Deserialize<'de> for IdentityHasher {
                     Some(value) => value,
                     None => return Err(de::Error::missing_field("used")),
                 };
-                Ok(IdentityHasher { hash: hash, used: used })
+                Ok(IdentityHasher {
+                    hash: hash,
+                    used: used,
+                })
             }
 
             #[cfg(not(debug_assertions))]
@@ -308,11 +314,7 @@ impl<'de> Deserialize<'de> for IdentityHasher {
         const FIELDS: &'static [&'static str] = &["hash", "used"];
         #[cfg(not(debug_assertions))]
         const FIELDS: &'static [&'static str] = &["hash"];
-        deserializer.deserialize_struct(
-            "IdentityHasher",
-            FIELDS,
-            IdentityHasherVisitor,
-        )
+        deserializer.deserialize_struct("IdentityHasher", FIELDS, IdentityHasherVisitor)
     }
 }
 

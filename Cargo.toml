@@ -2,6 +2,7 @@
 name = "identity_hasher"
 version = "0.1.0"
 authors = ["Anders Evensen"]
+include = ["src/lib.rs", "build.rs"]
 
 [dependencies]
 doc_item = {version = "0.2.5", optional = true}

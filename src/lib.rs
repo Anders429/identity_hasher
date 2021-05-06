@@ -1,11 +1,9 @@
-#![cfg_attr(rustc_1_6, no_std)]
+#![no_std]
 
 #[cfg(feature = "doc_item")]
 extern crate doc_item;
 #[cfg(feature = "serde")]
 extern crate serde;
-#[cfg(not(rustc_1_6))]
-extern crate std as core;
 
 use core::fmt;
 use core::hash::Hasher;
@@ -54,8 +52,6 @@ macro_rules! debug_assert_unused {
 
 macro_rules! write_integer {
     ($_fn:ident, $int_type:ty) => {
-        #[cfg(rustc_1_3)]
-        #[cfg_attr(feature = "doc_item", since(content = "1.3.0"))]
         #[inline]
         fn $_fn(&mut self, i: $int_type) {
             debug_assert_unused!(self);

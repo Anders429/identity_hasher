@@ -17,9 +17,7 @@ jobs:
           - beta
           - nightly
           - 1.26.0
-          - 1.6.0
-          - 1.3.0
-          - 1.0.0
+          - 1.8.0
       fail-fast: false
     steps:
     - uses: actions/checkout@v2

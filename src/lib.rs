@@ -29,6 +29,7 @@ macro_rules! debug_assert_unused {
 macro_rules! write_integer {
     ($_fn:ident, $int_type:ty) => {
         #[cfg(rustc_1_3)]
+        #[inline]
         fn $_fn(&mut self, i: $int_type) {
             debug_assert_unused!(self);
             self.hash = i as u64;
@@ -38,6 +39,7 @@ macro_rules! write_integer {
 
 macro_rules! write_integer_unavailable {
     ($_fn:ident, $int_type:ty) => {
+        #[inline]
         fn $_fn(&mut self, _i: $int_type) {
             panic!("IdentityHasher cannot hash an {}.", stringify!($int_type));
         }
@@ -45,6 +47,7 @@ macro_rules! write_integer_unavailable {
 }
 
 impl Hasher for IdentityHasher {
+    #[inline]
     fn write(&mut self, bytes: &[u8]) {
         debug_assert_unused!(self);
         debug_assert!(
@@ -81,6 +84,7 @@ impl Hasher for IdentityHasher {
     #[cfg(has_i128)]
     write_integer_unavailable!(write_i128, i128);
 
+    #[inline]
     fn finish(&self) -> u64 {
         self.hash
     }

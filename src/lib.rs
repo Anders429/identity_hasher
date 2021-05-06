@@ -10,6 +10,7 @@ use core::mem::transmute;
 #[cfg(feature = "doc_item")]
 use doc_item::since;
 
+#[cfg_attr(feature = "doc_item", since(content = "1.0.0"))]
 #[derive(Clone, Debug, Default)]
 pub struct IdentityHasher {
     hash: u64,

@@ -12,11 +12,11 @@ use core::mem::transmute;
 #[cfg(feature = "doc_item")]
 use doc_item::since;
 #[cfg(feature = "serde")]
+use serde::ser::SerializeStruct;
+#[cfg(feature = "serde")]
 use serde::Serialize;
 #[cfg(feature = "serde")]
 use serde::Serializer;
-#[cfg(feature = "serde")]
-use serde::ser::SerializeStruct;
 
 #[cfg_attr(feature = "doc_item", since(content = "1.0.0"))]
 #[derive(Clone, Debug, Default)]
@@ -36,7 +36,7 @@ macro_rules! debug_assert_unused {
 
 #[cfg(not(debug_assertions))]
 macro_rules! debug_assert_unused {
-    ($_self:ident) => {}
+    ($_self:ident) => {};
 }
 
 macro_rules! write_integer {
@@ -133,13 +133,18 @@ impl Serialize for IdentityHasher {
 #[cfg(test)]
 mod tests {
     use core::hash::Hasher;
+    use core::mem::transmute;
     use IdentityHasher;
 
     #[test]
     fn write() {
         let mut hasher = IdentityHasher::default();
 
-        hasher.write(&42u64.to_ne_bytes());
+        hasher.write(&unsafe {
+            // SAFETY: [u8; 8] and u64 are the same size, and any representation of a u64 will
+            // correspond to a valid value of [u8; 8].
+            transmute::<u64, [u8; 8]>(42)
+        });
 
         assert_eq!(hasher.finish(), 42);
     }
@@ -148,7 +153,11 @@ mod tests {
     fn write_less_than_8_bytes() {
         let mut hasher = IdentityHasher::default();
 
-        hasher.write(&42u8.to_ne_bytes());
+        hasher.write(&unsafe {
+            // SAFETY: [u8; 1] and u8 are the same size, and any representation of a u8 will
+            // correspond to a valid value of [u8; 1].
+            transmute::<u8, [u8; 1]>(42)
+        });
 
         assert_eq!(hasher.finish(), 42);
     }

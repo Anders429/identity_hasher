@@ -328,11 +328,7 @@ mod tests {
     fn write() {
         let mut hasher = IdentityHasher::default();
 
-        hasher.write(&unsafe {
-            // SAFETY: [u8; 8] and u64 are the same size, and any representation of a u64 will
-            // correspond to a valid value of [u8; 8].
-            transmute::<u64, [u8; 8]>(42)
-        });
+        hasher.write(&[42, 0, 0, 0, 0, 0, 0, 0]);
 
         assert_eq!(hasher.finish(), 42);
     }
@@ -341,11 +337,7 @@ mod tests {
     fn write_less_than_8_bytes() {
         let mut hasher = IdentityHasher::default();
 
-        hasher.write(&unsafe {
-            // SAFETY: [u8; 1] and u8 are the same size, and any representation of a u8 will
-            // correspond to a valid value of [u8; 1].
-            transmute::<u8, [u8; 1]>(42)
-        });
+        hasher.write(&[42]);
 
         assert_eq!(hasher.finish(), 42);
     }
@@ -369,8 +361,8 @@ mod tests {
     fn write_twice() {
         let mut hasher = IdentityHasher::default();
 
-        hasher.write(&42u64.to_ne_bytes());
-        hasher.write(&42u64.to_ne_bytes());
+        hasher.write(&[42, 0, 0, 0, 0, 0, 0, 0]);
+        hasher.write(&[42, 0, 0, 0, 0, 0, 0, 0]);
     }
 
     macro_rules! test_write_integer {

@@ -3,5 +3,8 @@ name = "identity_hasher"
 version = "0.1.0"
 authors = ["Anders Evensen"]
 
+[dependencies]
+doc_item = {version = "0.2.5", optional = true}
+
 [build-dependencies]
 autocfg = "1.0.1"

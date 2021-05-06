@@ -1,10 +1,14 @@
 #![cfg_attr(rustc_1_6, no_std)]
 
+#[cfg(feature = "doc_item")]
+extern crate doc_item;
 #[cfg(not(rustc_1_6))]
 extern crate std as core;
 
 use core::hash::Hasher;
 use core::mem::transmute;
+#[cfg(feature = "doc_item")]
+use doc_item::since;
 
 #[derive(Clone, Debug, Default)]
 pub struct IdentityHasher {
@@ -29,6 +33,7 @@ macro_rules! debug_assert_unused {
 macro_rules! write_integer {
     ($_fn:ident, $int_type:ty) => {
         #[cfg(rustc_1_3)]
+        #[cfg_attr(feature = "doc_item", since(content = "1.3.0"))]
         #[inline]
         fn $_fn(&mut self, i: $int_type) {
             debug_assert_unused!(self);
@@ -39,6 +44,7 @@ macro_rules! write_integer {
 
 macro_rules! write_integer_unavailable {
     ($_fn:ident, $int_type:ty) => {
+        #[cfg_attr(feature = "doc_item", since(content = "1.26.0"))]
         #[inline]
         fn $_fn(&mut self, _i: $int_type) {
             panic!("IdentityHasher cannot hash an {}.", stringify!($int_type));

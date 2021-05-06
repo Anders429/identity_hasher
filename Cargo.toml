@@ -5,6 +5,7 @@ authors = ["Anders Evensen"]
 
 [dependencies]
 doc_item = {version = "0.2.5", optional = true}
+serde = {version = "1.0.125", default-features = false, optional = true}
 
 [build-dependencies]
 autocfg = "1.0.1"

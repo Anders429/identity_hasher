@@ -2,6 +2,8 @@
 
 #[cfg(feature = "doc_item")]
 extern crate doc_item;
+#[cfg(feature = "serde")]
+extern crate serde;
 #[cfg(not(rustc_1_6))]
 extern crate std as core;
 
@@ -9,6 +11,12 @@ use core::hash::Hasher;
 use core::mem::transmute;
 #[cfg(feature = "doc_item")]
 use doc_item::since;
+#[cfg(feature = "serde")]
+use serde::Serialize;
+#[cfg(feature = "serde")]
+use serde::Serializer;
+#[cfg(feature = "serde")]
+use serde::ser::SerializeStruct;
 
 #[cfg_attr(feature = "doc_item", since(content = "1.0.0"))]
 #[derive(Clone, Debug, Default)]
@@ -94,6 +102,31 @@ impl Hasher for IdentityHasher {
     #[inline]
     fn finish(&self) -> u64 {
         self.hash
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "doc_item", since(content = "1.13.0"))]
+impl Serialize for IdentityHasher {
+    #[cfg(debug_assertions)]
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = try!(serializer.serialize_struct("IdentityHasher", 2));
+        try!(state.serialize_field("hash", &self.hash));
+        try!(state.serialize_field("used", &self.used));
+        state.end()
+    }
+
+    #[cfg(not(debug_assertions))]
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = try!(serializer.serialize_struct("IdentityHasher", 1));
+        try!(state.serialize_field("hash", &self.hash));
+        state.end()
     }
 }
 

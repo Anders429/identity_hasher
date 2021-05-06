@@ -73,4 +73,6 @@ jobs:
         toolchain: nightly
         override: true
     - uses: actions-rs/tarpaulin@v0.1
+      with:
+        args: --features serde
     - uses: codecov/codecov-action@v1

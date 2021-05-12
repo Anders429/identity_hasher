@@ -15,7 +15,7 @@ mod impl_serde;
 use doc_item::since;
 
 #[cfg_attr(feature = "doc_item", since(content = "1.8.0"))]
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct IdentityHasher {
     hash: u64,
     #[cfg(debug_assertions)]

@@ -1,5 +1,7 @@
 use core::fmt;
 #[cfg(feature = "doc_item")]
+use doc_item::docbox;
+#[cfg(feature = "doc_item")]
 use doc_item::since;
 use serde::de;
 use serde::de::MapAccess;
@@ -13,6 +15,7 @@ use serde::Serializer;
 use IdentityHasher;
 
 #[cfg_attr(feature = "doc_item", since(content = "1.13.0"))]
+#[cfg_attr(feature = "doc_item", docbox(content = "This is supported on <strong>crate feature <code>serde</code></strong> only.", class="portability"))]
 impl Serialize for IdentityHasher {
     #[cfg(debug_assertions)]
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
@@ -37,6 +40,7 @@ impl Serialize for IdentityHasher {
 }
 
 #[cfg_attr(feature = "doc_item", since(content = "1.13.0"))]
+#[cfg_attr(feature = "doc_item", docbox(content = "This is supported on <strong>crate feature <code>serde</code></strong> only.", class="portability"))]
 impl<'de> Deserialize<'de> for IdentityHasher {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where

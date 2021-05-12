@@ -209,3 +209,46 @@ impl<'de> Deserialize<'de> for IdentityHasher {
         deserializer.deserialize_struct("IdentityHasher", FIELDS, IdentityHasherVisitor)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use serde_test::assert_tokens;
+    use serde_test::Token;
+    use IdentityHasher;
+
+    #[test]
+    #[cfg_attr(not(debug_assertions), ignore)]
+    fn serialize_and_deserialize_debug() {
+        assert_tokens(
+            &IdentityHasher::default(),
+            &[
+                Token::Struct {
+                    name: "IdentityHasher",
+                    len: 2,
+                },
+                Token::Str("hash"),
+                Token::U64(0),
+                Token::Str("used"),
+                Token::Bool(false),
+                Token::StructEnd,
+            ],
+        );
+    }
+
+    #[test]
+    #[cfg_attr(debug_assertions, ignore)]
+    fn serialize_and_deserialize_release() {
+        assert_tokens(
+            &IdentityHasher::default(),
+            &[
+                Token::Struct {
+                    name: "IdentityHasher",
+                    len: 1,
+                },
+                Token::Str("hash"),
+                Token::U64(0),
+                Token::StructEnd,
+            ],
+        );
+    }
+}

@@ -8,7 +8,12 @@
 //!
 //! ```
 //! use identity_hasher::IdentityHasher;
+//! # #[cfg(use_nested_groups)]
 //! use std::{collections::HashSet, hash::BuildHasherDefault};
+//! # #[cfg(not(use_nested_groups))]
+//! # use std::collections::HashSet;
+//! # #[cfg(not(use_nested_groups))]
+//! # use std::hash::BuildHasherDefault;
 //!
 //! let mut set = HashSet::with_hasher(BuildHasherDefault::<IdentityHasher>::default());
 //! set.insert(42);

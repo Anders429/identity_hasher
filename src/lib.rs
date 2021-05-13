@@ -21,6 +21,8 @@
 //!
 //! assert_eq!(set.len(), 2);
 //! ```
+//!
+//! [`HashSet`]: https://doc.rust-lang.org/std/collections/struct.HashSet.html
 
 #![no_std]
 

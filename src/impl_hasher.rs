@@ -113,6 +113,7 @@ impl Hasher for IdentityHasher {
     #[cfg(has_i128)]
     write_integer_unavailable!(write_i128, i128);
 
+    /// Returns the written value.
     #[inline]
     fn finish(&self) -> u64 {
         self.hash

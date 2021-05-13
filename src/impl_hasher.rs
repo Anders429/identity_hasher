@@ -37,6 +37,31 @@ macro_rules! write_integer_unavailable {
     };
 }
 
+/// [`Hasher`] implementation for `IdentityHasher`.
+///
+/// Only one of the write methods provided here may ever be called. Multiple writes will panic on
+/// debug builds, but the checks are optimized away on release builds. Improper use on release will
+/// not trigger any undefined behavior, but it is not considered correct and will likely not
+/// function as expected.
+///
+/// As the `finish()` method must return a [`u64`], only a maximum of 8 bytes may be written.
+/// Attempting to write either a [`u128`] or [`i128`] will panic on both debug and release builds.
+/// Attempting to write more than 8 bytes using the `write()` method will panic on debug builds and
+/// will only write the first 8 bytes on release builds.
+///
+/// # Example
+/// ```
+/// use identity_hasher::IdentityHasher;
+/// use std::hash::Hasher;
+///
+/// let mut hasher = IdentityHasher::default();
+///
+/// hasher.write_u8(42);
+///
+/// assert_eq!(hasher.finish(), 42);
+/// ```
+///
+/// [`Hasher`]: core::hash::Hash
 impl Hasher for IdentityHasher {
     #[inline]
     fn write(&mut self, bytes: &[u8]) {

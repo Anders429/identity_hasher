@@ -20,6 +20,8 @@
 //!
 //! [`HashSet`]: https://doc.rust-lang.org/std/collections/struct.HashSet.html
 
+#![cfg_attr(doc, feature(extended_key_value_attributes))]
+
 #![no_std]
 
 #[cfg(feature = "doc_item")]

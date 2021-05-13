@@ -19,6 +19,9 @@ macro_rules! debug_assert_unused {
 
 macro_rules! write_integer {
     ($_fn:ident, $int_type:ty) => {
+        #[doc = concat!("Writes a single `", stringify!($int_type), "` into this hasher.")]
+        ///
+        /// If the hasher has been written to previously, this method will panic on debug builds.
         #[inline]
         fn $_fn(&mut self, i: $int_type) {
             debug_assert_unused!(self);
@@ -29,6 +32,8 @@ macro_rules! write_integer {
 
 macro_rules! write_integer_unavailable {
     ($_fn:ident, $int_type:ty) => {
+        /// This method is unavailable for this hasher, as it requires writing more than 8 bytes.
+        /// Using it will result in a panic.
         #[cfg_attr(feature = "doc_item", since(content = "1.26.0"))]
         #[inline]
         fn $_fn(&mut self, _i: $int_type) {
@@ -49,6 +54,8 @@ macro_rules! write_integer_unavailable {
 /// Attempting to write more than 8 bytes using the `write()` method will panic on debug builds and
 /// will only write the first 8 bytes on release builds.
 ///
+/// If a type cannot be hashed according to the above criteria, a different hasher should be used.
+///
 /// # Example
 /// ```
 /// use identity_hasher::IdentityHasher;
@@ -61,8 +68,14 @@ macro_rules! write_integer_unavailable {
 /// assert_eq!(hasher.finish(), 42);
 /// ```
 ///
-/// [`Hasher`]: core::hash::Hash
+/// [`Hasher`]: core::hash::Hasher
 impl Hasher for IdentityHasher {
+    /// Write some data into this hasher.
+    ///
+    /// This method should only write up to 8 bytes. It will panic on debug builds if more than 8
+    /// bytes are provided, and on release builds it will only write the first 8 bytes.
+    ///
+    /// If the hasher has been written to previously, this method will panic on debug builds.
     #[inline]
     fn write(&mut self, bytes: &[u8]) {
         debug_assert_unused!(self);

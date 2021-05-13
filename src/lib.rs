@@ -23,7 +23,7 @@
 extern crate doc_item;
 #[cfg(feature = "serde")]
 extern crate serde;
-#[cfg(test)]
+#[cfg(all(feature = "serde", feature = "serde_test"))]
 extern crate serde_test;
 
 mod impl_hasher;

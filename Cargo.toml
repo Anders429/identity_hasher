@@ -7,9 +7,9 @@ include = ["src/lib.rs", "build.rs"]
 [dependencies]
 doc_item = {version = "0.2.5", optional = true}
 serde = {version = "1.0.125", default-features = false, optional = true}
+serde_test = {version = "1.0.125", optional = true}
 
 [dev-dependencies]
-serde_test = "1.0.125"
 
 [build-dependencies]
 autocfg = "1.0.1"

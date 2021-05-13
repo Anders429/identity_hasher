@@ -226,7 +226,7 @@ impl<'de> Deserialize<'de> for IdentityHasher {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature="serde_test"))]
 mod tests {
     use serde_test::assert_tokens;
     use serde_test::Token;
